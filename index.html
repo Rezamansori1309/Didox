@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIDOX – Used Film, Camera & Audio Equipment</title>
+<meta name="description" content="DIDOX – gebrauchte professionelle Film-, Kamera-, Audio- und Studioausrüstung. Geprüfte Produkte mit transparenter Beschreibung.">
+<style>
+:root{--bg:#090909;--card:#121212;--gold:#d6ad55;--text:#f3f0e8;--muted:#aaa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{padding:42px 6%;border-bottom:1px solid #292929;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.logo{font-size:34px;font-weight:800;letter-spacing:5px;color:var(--gold)} header span{color:var(--muted)}
+main{padding:35px 6%;max-width:1500px;margin:auto}.hero{margin-bottom:30px}
+h1{font-size:42px;margin:0 0 10px}.hero p{color:var(--muted);max-width:700px;line-height:1.6}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin:25px 0}
+input,select{background:#151515;border:1px solid #333;color:white;padding:13px 15px;border-radius:8px}
+input{min-width:280px;flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid #272727;border-radius:12px;padding:20px;display:flex;flex-direction:column;min-height:245px}
+.cat{color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.title{font-size:18px;line-height:1.35;margin:12px 0;flex:1}.price{font-size:24px;font-weight:700;margin:10px 0}
+.btn{display:block;text-align:center;text-decoration:none;background:var(--gold);color:#090909;padding:12px;border-radius:7px;font-weight:700}
+.meta{color:var(--muted);font-size:13px;margin-bottom:14px}
+footer{margin-top:60px;padding:35px 6%;border-top:1px solid #292929;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<header><div class="logo">DIDOX</div><span>Film • Camera • Audio • Studio Equipment</span></header>
+<main>
+<section class="hero">
+<h1>Professional used equipment.</h1>
+<p>Gebrauchte Film-, Kamera-, Audio- und Studioausrüstung. Durchsuche unser aktuelles Sortiment und öffne das jeweilige Angebot für weitere Informationen.</p>
+</section>
+<div class="controls">
+<input id="search" placeholder="Produkt suchen …">
+<select id="cat"><option value="">Alle Kategorien</option></select>
+</div>
+<div id="count" class="meta"></div>
+<div id="grid" class="grid"></div>
+</main>
+<footer>DIDOX · Used Film, Camera & Audio Equipment</footer>
+<script>
+let products=[];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(){
+ const q=document.querySelector('#search').value.toLowerCase().trim(), c=document.querySelector('#cat').value;
+ const list=products.filter(p=>(!q||p.title.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q))&&(!c||p.category===c));
+ document.querySelector('#count').textContent=list.length+' Produkte';
+ document.querySelector('#grid').innerHTML=list.map(p=>`<article class="card">
+ <div class="cat">${esc(p.category||'Equipment')}</div>
+ <div class="title">${esc(p.title)}</div>
+ <div class="meta">${esc(p.condition)} · SKU ${esc(p.sku)}</div>
+ <div class="price">€${p.price.toFixed(2)}</div>
+ <a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">Angebot ansehen</a>
+ </article>`).join('');
+}
+fetch('products.json').then(r=>r.json()).then(d=>{
+ products=d;
+ [...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>document.querySelector('#cat').insertAdjacentHTML('beforeend',`<option>${esc(c)}</option>`));
+ render();
+});
+document.querySelector('#search').oninput=render;
+document.querySelector('#cat').onchange=render;
+</script>
+</body></html>
